@@ -1,0 +1,21 @@
+{
+  "name": "doctormasterbot",
+  "version": "1.0.0",
+  "description": "DoctorMasterBot is a telegram Bot for health care",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "author": "Dante Pérez",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "node-telegram-bot-api": "^0.61.0",
+    "telebot": "^1.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}

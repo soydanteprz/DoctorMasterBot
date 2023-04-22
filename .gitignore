@@ -1,0 +1,36 @@
+# ignore node_modules directory
+node_modules/
+
+# ignore log files
+*.log
+*.log.*
+
+# ignore environment variables file
+.env
+
+# ignore compiled output
+dist/
+build/
+
+# ignore package-lock.json
+package-lock.json
+
+# ignore IDE and editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw*
+
+# ignore macOS folder attributes
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ignore user-specific files
+*.bak
+*.cache
+*.pyc
