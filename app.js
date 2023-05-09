@@ -10,24 +10,7 @@ const { text } = require("express");
 
 const bot = new TelegramBot(apiKey, { polling: true });
 
-// Create a new instance of the ChatGPT class
 
-// const configuration = new Configuration({
-//     apiKey: process.env.API_KEY_CHATGPT,
-// });
-// const openai = new OpenAIApi(configuration);
-
-// async function generateCompletion() {
-//     const response = await openai.createCompletion({
-//         model: "text-davinci-003",
-//         prompt: "Say this is a test",
-//         temperature: 0,
-//         max_tokens: 7,
-//     });
-//     console.log(response.data.choices[0].text);
-// }
-
-// generateCompletion();
 // hashmap to store the user's mood
 const mood = new Map([
     ["Happy", "Glad to hear that"],
@@ -71,11 +54,9 @@ const selfCare = new Map([
     ],
 ]);
 
-// console.log values of the hashmap
-// console.log(mood.get("Happy"));
-// console.log("prueba");
+
 valuesArray = Array.from(mood.values());
-// console.log(valuesArray);
+
 
 // Define a state variable to keep track of the user's current mood
 let userMood = null;
@@ -83,7 +64,7 @@ let userMood = null;
 const sad = new Map();
 sad.set("I am sad because I am have a loss", "I am sorry to hear that");
 
-// console.log(mood);
+
 
 const selfCareKeys = Array.from(selfCare.keys()); // Get an array of the keys from the mood Map
 const keyboardSelfCare = selfCareKeys.map((key) => [key]); // Convert the array of keys to an array of arrays
@@ -93,7 +74,7 @@ const keyboard = moodKeys.map((key) => [key]); // Convert the array of keys to a
 //convert the array of values to an array of arrays
 const moodValues = Array.from(mood.values());
 const keyboard2 = moodValues.map((value) => [value]);
-// console.log(keyboard2);
+
 
 bot.on("message", (msg) => {
     // Listen for messages
@@ -195,4 +176,37 @@ bot.onText(/Self-Care Tips/, (msg) => {
             keyboard: keyboardSelfCare,
         },
     });
+});
+
+// MESSAGE FROM RESOURCES
+bot.onText(/Resources/, (msg) => {
+    bot.sendMessage(
+        msg.chat.id,
+        "Here are some resources that you can check out!",
+        {
+            reply_markup: {
+                keyboard: [
+                    ["Crisis Services 🆘", "Mental Health Apps 📱"],
+                    ["Mental Health Websites 🌐", "Back"],
+                ],
+            },
+        }
+    );
+});
+
+// MESSAGE FROM BACK redirect to start
+bot.onText(/Back/, (msg) => {
+    bot.sendMessage(
+        msg.chat.id,
+        "Welcome to the Mental Health Bot! How can I help you today?",
+        {
+            reply_markup: {
+                keyboard: [
+                    ["Psychoeducation 📚", "Emotional Support 🤗"],
+                    ["Symptoms 🤒", "Self-Care Tips 🧘‍♀️ "],
+                    ["Resources"],
+                ],
+            },
+        }
+    );
 });
