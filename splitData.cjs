@@ -1,8 +1,12 @@
 const fs = require("fs");
 const csv = require("csv-parser");
 const { preprocessText } = require("./preprocessData");
+const { performTraining } = require("./Training");
+const { split } = require("@tensorflow/tfjs");
 
 const preprocessedData = [];
+const trainingData = [];
+const validationData = [];
 
 fs.createReadStream("MentalHealthFAQ.csv")
     .pipe(csv())
@@ -23,6 +27,8 @@ fs.createReadStream("MentalHealthFAQ.csv")
         const trainingData = preprocessedData.slice(0, trainDataSize);
         const validationData = preprocessedData.slice(trainDataSize);
 
-        console.log("Training data:", trainingData);
+        // console.log("Training data:", trainingData);
         console.log("Validation data:", validationData);
     });
+
+performTraining(trainingData, validationData);
