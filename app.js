@@ -1,15 +1,21 @@
 const TelegramBot = require("node-telegram-bot-api");
-const ChatGPT = require("./chatgpt.js");
-const { Configuration, OpenAIApi } = require("openai");
+const express = require("express");
+const app = express();
+
+app.get("/", (req, res) => {
+    res.send("Hello World!");
+});
+
+app.listen(3000, () => {
+    console.log("Example app listening on port 3000!");
+});
 
 require("dotenv").config();
-// const Telebot = require('telebot');
+
 const apiKey = process.env.API_KEY;
 
-const { text } = require("express");
 
 const bot = new TelegramBot(apiKey, { polling: true });
-
 
 // hashmap to store the user's mood
 const mood = new Map([
@@ -52,11 +58,59 @@ const selfCare = new Map([
         "Socializing 👯‍♀️",
         "Spending time with friends and family can help improve your mood and reduce feelings of loneliness. You can try scheduling regular social activities, joining a club or group, or reaching out to a friend you haven't talked to in a while.",
     ],
+    [
+        "Journaling 📝",
+        "Journaling can help you process your thoughts and emotions. You can try writing down your thoughts and feelings, keeping a gratitude journal, or writing about a positive experience you had that day.",
+    ],
+    [
+        "Hobbies 🎨",
+        "Having a hobby can help you relax and reduce stress. You can try taking up a new hobby, joining a club or group, or spending more time on a hobby you already enjoy.",
+    ],
+    ["Back 🔙"],
 ]);
 
+// hashmap to store the psychoeducation
+const psychoeducation = new Map([
+    [
+        "Depression",
+        "Depression is a chronic mental illness characterized by persistent low mood, loss of interest, and energy that can lead to social isolation, job loss, and suicide.",
+    ],
+    [
+        "Anxiety",
+        "Anxiety is a mental health condition characterized by excessive worry, fear, and physical symptoms that can interfere with daily life.",
+    ],
+    [
+        "Stress",
+        "Stress is a normal physical and mental reaction to life experiences. Everyone expresses stress from time to time. Anything from everyday responsibilities like work and family to serious life events such as a new diagnosis, war, or the death of a loved one can trigger stress.",
+    ],
+    [
+        "Anger",
+        "Anger is a normal, healthy emotion. Everyone gets angry from time to time. Anger becomes a problem when it is intense, frequent, or uncontrollable. It can lead to problems at work, in relationships, and in your overall health.",
+    ],
+    [
+        "Loneliness",
+        "Loneliness is a state of social isolation and disconnection. It can be caused by a number of factors, including loss of a loved one, social isolation, or chronic health conditions. Loneliness can have a negative impact on physical and mental health.",
+    ],
+    [
+        "Grief",
+        "Grief is the natural human response to loss. It is a process of emotional suffering that can be caused by the death of a loved one, the end of a relationship, or any other significant loss. Grief is not a linear process, and it can take time to heal.",
+    ],
+    [
+        "Self-Esteem",
+        "Self-esteem is a person's overall sense of self-worth or personal value. It is how you feel about yourself and your abilities. Self-esteem is influenced by a number of factors, including genetics, upbringing, and life experiences.",
+    ],
+    [
+        "Relationships",
+        "Relationships are an important part of our lives. They can provide us with love, support, and companionship. Healthy relationships are based on trust, respect, and communication.",
+    ],
+    [
+        "Back pain",
+        "Back pain is a common problem that affects people of all ages. It can be caused by a number of factors, including injury, overuse, and poor posture. Back pain can be mild or severe, and it can interfere with daily activities.",
+    ],
+    ["Back 🔙"],
+]);
 
 valuesArray = Array.from(mood.values());
-
 
 // Define a state variable to keep track of the user's current mood
 let userMood = null;
@@ -64,16 +118,12 @@ let userMood = null;
 const sad = new Map();
 sad.set("I am sad because I am have a loss", "I am sorry to hear that");
 
+const pairedKeysPsychoeducation = pairMapKeys(psychoeducation); // Pair the keys from the psychoeducation Map
+
+const pairedKeysSelfCare = pairMapKeys(selfCare); // Pair the keys from the selfCare Map
 
 
-const selfCareKeys = Array.from(selfCare.keys()); // Get an array of the keys from the mood Map
-const keyboardSelfCare = selfCareKeys.map((key) => [key]); // Convert the array of keys to an array of arrays
-
-const moodKeys = Array.from(mood.keys()); // Get an array of the keys from the mood Map
-const keyboard = moodKeys.map((key) => [key]); // Convert the array of keys to an array of arrays
 //convert the array of values to an array of arrays
-const moodValues = Array.from(mood.values());
-const keyboard2 = moodValues.map((value) => [value]);
 
 
 bot.on("message", (msg) => {
@@ -82,6 +132,7 @@ bot.on("message", (msg) => {
     const text = msg.text; // Get the text from the received message
     const moodText = mood.get(text); // Get the mood text from the mood Map
     const selfCareText = selfCare.get(text); // Get the mood text from the mood Map
+    const psychoeducationText = psychoeducation.get(text); // Get the mood text from the mood Map
     if (moodText) {
         // If the mood text exists
         bot.sendMessage(chatId, moodText); // Send the mood text to the chat
@@ -91,28 +142,21 @@ bot.on("message", (msg) => {
         // If the mood text exists
         bot.sendMessage(chatId, selfCareText); // Send the mood text to the chat
     }
-});
 
-// bot.onText(/\/start/, (msg) => {
-//     bot.sendMessage(
-//         msg.chat.id,
-//         "Welcome " +
-//             msg.chat.first_name +
-//             " to DoctorMasterBot \n\n" +
-//             "How do you feel today?",
-//         {
-//             reply_markup: {
-//                 keyboard: keyboard,
-//             },
-//         }
-//     );
-// });
+    if (psychoeducationText) {
+        // If the mood text exists
+        bot.sendMessage(chatId, psychoeducationText); // Send the mood text to the chat
+    }
+});
 
 // MESSAGE FROM START
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(
         msg.chat.id,
-        "Welcome to the Mental Health Bot! How can I help you today?",
+        "Hi " +
+            msg.chat.first_name +
+            "!" +
+            "\nWelcome to the Mental Health Bot! How can I help you today?",
         {
             reply_markup: {
                 keyboard: [
@@ -129,13 +173,7 @@ bot.onText(/\/start/, (msg) => {
 bot.onText(/Psychoeducation/, (msg) => {
     bot.sendMessage(msg.chat.id, "What would you like to learn about today?", {
         reply_markup: {
-            keyboard: [
-                ["Depression", "Anxiety"],
-                ["Stress", "Anger"],
-                ["Loneliness", "Grief"],
-                ["Self-Esteem", "Relationships"],
-                ["Back"],
-            ],
+            keyboard: pairedKeysPsychoeducation,
         },
     });
 });
@@ -173,7 +211,7 @@ bot.onText(/Symptoms/, (msg) => {
 bot.onText(/Self-Care Tips/, (msg) => {
     bot.sendMessage(msg.chat.id, "Here are some self-care tips for you!", {
         reply_markup: {
-            keyboard: keyboardSelfCare,
+            keyboard: pairedKeysSelfCare,
         },
     });
 });
@@ -198,7 +236,10 @@ bot.onText(/Resources/, (msg) => {
 bot.onText(/Back/, (msg) => {
     bot.sendMessage(
         msg.chat.id,
-        "Welcome to the Mental Health Bot! How can I help you today?",
+        "Hi " +
+            msg.chat.first_name +
+            "!" +
+            "\nWelcome to the Mental Health Bot! How can I help you today?",
         {
             reply_markup: {
                 keyboard: [
@@ -210,3 +251,19 @@ bot.onText(/Back/, (msg) => {
         }
     );
 });
+
+// Function to pair the keys of a Map into an array of arrays
+function pairMapKeys(map) {
+    const keys = Array.from(map.keys()); // Get an array of the keys from the Map
+    const pairedKeys = []; // Create an empty array to store the paired keys
+
+    for (let i = 0; i < keys.length; i += 2) {
+        // Loop through the keys array
+        const pair = [keys[i], keys[i + 1]]; // Create a pair from every two keys
+        pairedKeys.push(pair); // Push the pair into the pairedKeys array
+    }
+
+    return pairedKeys; // Return the pairedKeys array
+}
+
+console.log("Bot is running...");
